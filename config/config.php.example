@@ -1,0 +1,61 @@
+<?php
+/**
+ * Example configuration file for PingMonit monitoring system
+ * Copy this file to config.php and adjust it to your needs
+ */
+
+return [
+    // Hosts to monitor
+    // Both IP addresses and domain names are supported
+    'ips' => [
+        'google.com' => ['send_email' => true, 'name' => 'Google'],
+        '8.8.8.8' => ['send_email' => true, 'name' => 'DNS'],
+        '192.168.1.1' => ['send_email' => false, 'name' => 'Local'],
+        // Add your hosts here
+    ],
+
+    'web_refresh_seconds' => 60,
+
+    // Email recipients
+    // Notifications will be sent to all addresses listed here
+    'emails' => [
+        'admin@example.com',
+        'support@example.com',
+        // Add recipient emails here
+    ],
+
+    // Logs directory
+    // Make sure the process running PingMonit has write permissions to this directory
+    'logs_path' => __DIR__ . '/../logs/',
+
+    // JSON file path for storing the current system state
+    // The file will be created automatically on first run
+    'state_file' => __DIR__ . '/../state/system_state.json',
+
+    'telegram' => [
+        'enabled' => false,
+        'api_key' => '',
+        'bot_username' => '',
+        'chat_id' => '',
+    ],
+
+    // Email settings (PHPMailer)
+    // For Gmail, use an App Password instead of your regular password
+    'email' => [
+        'smtp_host' => 'smtp.gmail.com', // SMTP server (smtp.gmail.com, smtp.mail.ru, etc.)
+        'smtp_port' => 587, // Port (587 for TLS, 465 for SSL, 25 for plain)
+        'smtp_username' => 'your-email@gmail.com', // Your email
+        'smtp_password' => 'your-app-password', // App password (not your regular password)
+        'smtp_encryption' => 'tls', // tls or ssl
+        'from_email' => 'your-email@gmail.com', // Sender email
+        'from_name' => 'PingMonit System', // Sender name
+        'subject_prefix' => '[PingMonit] ', // Subject prefix
+    ],
+
+    // Monitoring settings
+    'monitoring' => [
+        'ping_timeout' => 5, // Ping timeout in seconds
+        'max_failures' => 3, // Max failures before switching to critical
+        'recovery_notification' => true, // Whether to send recovery notifications
+    ],
+];

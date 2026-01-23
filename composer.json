@@ -1,0 +1,40 @@
+{
+    "name": "edrard/pingmonit",
+    "description": "Simple monitoring system with web interface",
+    "type": "project",
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "Edrard\\Pingmonit\\": "src/"
+        }
+    },
+    "authors": [{
+        "name": "Edrard",
+        "email": "demonand@gmail.com"
+    }],
+    "repositories": [
+        {
+            "type": "git",
+            "url": "https://github.com/Edrard/function.git"
+        },
+        {
+            "type": "git",
+            "url": "https://github.com/Edrard/MyLog.git"
+        },
+        {
+            "type": "git",
+            "url": "https://github.com/Edrard/Variable.git"
+        }
+    ],
+    "require": {
+        "php": ">=7.0.0",
+        "edrard/function": "dev-master",
+        "edrard/mylog": "dev-master",
+        "edrard/variable": "dev-main",
+        "nesbot/carbon": "^2.55",
+        "phpmailer/phpmailer": "^6.8",
+        "pear/console_commandline": "^1.2",
+        "geerlingguy/ping": "^1.2",
+        "longman/telegram-bot": "^0.83.1"
+    }
+}

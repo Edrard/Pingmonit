@@ -1,0 +1,16 @@
+/vendor/
+/logs/
+/state/
+/public/index.html
+/config/config.php
+
+*.log
+*.tmp
+*.cache
+
+/.idea/
+/.vscode/
+*.iml
+
+.DS_Store
+Thumbs.db
