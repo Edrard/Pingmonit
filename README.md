@@ -34,7 +34,7 @@ It pings a list of hosts (IP addresses or domain names), stores the current stat
 ## Installation
 
 ```bash
-git clone 
+git clone https://github.com/Edrard/Pingmonit.git
 composer install
 ```
 
