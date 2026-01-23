@@ -38,6 +38,28 @@ git clone https://github.com/Edrard/Pingmonit.git
 composer install
 ```
 
+## Updating
+
+PingMonit includes `update.sh` to update the repository to the latest `main` and refresh Composer dependencies.
+
+Requirements:
+
+- `git`
+- `composer`
+
+Usage:
+
+```bash
+chmod +x update.sh
+./update.sh
+```
+
+Notes:
+
+- Run it from the **repository root** (where `run.php` is located).
+- The script will **stop** if you have local changes (to avoid overwriting your edits).
+- If you run it as root, it will try to restore file ownership to match `run.php`.
+
 ## Configuration
 
 Copy and edit:
