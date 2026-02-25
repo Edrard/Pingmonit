@@ -51,7 +51,6 @@ Requirements:
 Usage:
 
 ```bash
-chmod +x update.sh
 ./update.sh
 ```
 
