@@ -7,10 +7,15 @@ use Edrard\Pingmonit\Lock\FlockLock;
 use Edrard\Pingmonit\Notifier\CompositeNotifier;
 use Edrard\Pingmonit\Notifier\EmailNotifierAdapter;
 use Edrard\Pingmonit\Notifier\TelegramNotifierAdapter;
+use Edrard\Pingmonit\Notifier\UpsCompositeNotifier;
+use Edrard\Pingmonit\Notifier\UpsEmailNotifierAdapter;
+use Edrard\Pingmonit\Notifier\UpsTelegramNotifierAdapter;
 use Edrard\Pingmonit\Ping\JjgPingService;
 use Edrard\Pingmonit\Report\HtmlIndexReportGenerator;
 use Edrard\Pingmonit\State\HostStateRepository;
 use Edrard\Pingmonit\State\JsonStateStore;
+use Edrard\Pingmonit\Ups\UpsMonitor;
+use Edrard\Pingmonit\Ups\UpsSnmpClient;
 
 class CliRunner
 {
@@ -21,6 +26,7 @@ class CliRunner
         $disableTelegram = (bool) ($options['disable_telegram'] ?? false);
         $disableLock = (bool) ($options['disable_lock'] ?? false);
         $singleIp = $options['ip'] ?? null;
+        $singleUpsIp = $options['ups_ip'] ?? null;
         $lockFile = $options['lockfile'] ?? null;
 
         $monitoringConfig = Config::get('monitoring', []);
@@ -53,12 +59,14 @@ class CliRunner
                         'ip' => $singleIp,
                         'name' => (string) ($meta['name'] ?? ''),
                         'send_email' => (bool) ($meta['send_email'] ?? true),
+                        'web' => (bool) ($meta['web'] ?? true),
                     ];
                 } else {
                     $targets[] = [
                         'ip' => $singleIp,
                         'name' => '',
                         'send_email' => true,
+                        'web' => true,
                     ];
                 }
             } else {
@@ -68,6 +76,7 @@ class CliRunner
                             'ip' => $cfg,
                             'name' => '',
                             'send_email' => true,
+                            'web' => true,
                         ];
                         continue;
                     }
@@ -82,6 +91,7 @@ class CliRunner
                                 'ip' => $ip,
                                 'name' => '',
                                 'send_email' => true,
+                                'web' => true,
                             ];
                         }
                         continue;
@@ -92,6 +102,7 @@ class CliRunner
                             'ip' => $ip,
                             'name' => (string) ($cfg['name'] ?? ''),
                             'send_email' => (bool) ($cfg['send_email'] ?? true),
+                            'web' => (bool) ($cfg['web'] ?? true),
                         ];
                     }
                 }
@@ -151,9 +162,69 @@ class CliRunner
                 'disable_state' => $disableState,
             ]);
 
+            $upsTargets = [];
+            $upsConfig = Config::get('ups', []);
+            if (is_array($upsConfig)) {
+                foreach ($upsConfig as $ups) {
+                    if (!is_array($ups)) {
+                        continue;
+                    }
+
+                    $ip = (string) ($ups['ip'] ?? '');
+                    if ($ip === '') {
+                        continue;
+                    }
+
+                    if (is_string($singleUpsIp) && $singleUpsIp !== '' && $ip !== $singleUpsIp) {
+                        continue;
+                    }
+
+                    $ups['name'] = (string) ($ups['name'] ?? '');
+                    $ups['send_email'] = (bool) ($ups['send_email'] ?? true);
+                    $ups['web'] = (bool) ($ups['web'] ?? true);
+                    $ups['snmp_version'] = (string) ($ups['snmp_version'] ?? '2c');
+                    $ups['snmp_community'] = (string) ($ups['snmp_community'] ?? 'public');
+
+                    $upsTargets[] = $ups;
+                }
+            }
+
+            $upsStateFile = Config::get('ups_state_file', __DIR__ . '/../state/ups_state.json');
+            $upsStateStore = new JsonStateStore($upsStateFile);
+            $upsState = new HostStateRepository($upsStateStore);
+
+            $upsNotifier = null;
+            $upsNotifiers = [];
+            if (!$disableEmail) {
+                $upsNotifiers[] = new UpsEmailNotifierAdapter(new EmailNotifier());
+            }
+
+            if ($telegramEnabled && !$disableTelegram) {
+                $apiKey = (string) ($telegramConfig['api_key'] ?? '');
+                $botUsername = (string) ($telegramConfig['bot_username'] ?? '');
+                $chatId = $telegramConfig['chat_id'] ?? '';
+
+                if ($apiKey !== '' && $botUsername !== '' && $chatId !== '') {
+                    $upsNotifiers[] = new UpsTelegramNotifierAdapter($apiKey, $botUsername, $chatId);
+                }
+            }
+
+            if (count($upsNotifiers) === 1) {
+                $upsNotifier = $upsNotifiers[0];
+            } elseif (count($upsNotifiers) > 1) {
+                $upsNotifier = new UpsCompositeNotifier($upsNotifiers);
+            }
+
+            if ($upsTargets !== []) {
+                $upsMonitor = new UpsMonitor($upsState, new UpsSnmpClient(), $upsNotifier);
+                $upsMonitor->checkUps($upsTargets, [
+                    'disable_state' => $disableState,
+                ]);
+            }
+
             $webRefreshSeconds = (int) Config::get('web_refresh_seconds', 0);
             $reportGenerator = new HtmlIndexReportGenerator(__DIR__ . '/../public/index.html', $webRefreshSeconds);
-            $reportGenerator->generate($targets, $state);
+            $reportGenerator->generate($targets, $state, $upsTargets, $upsState);
 
             MyLog::info('PingMonit CLI finished');
         } finally {

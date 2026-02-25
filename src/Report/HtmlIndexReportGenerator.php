@@ -16,12 +16,17 @@ class HtmlIndexReportGenerator implements ReportGeneratorInterface
         $this->refreshSeconds = (int) $refreshSeconds;
     }
 
-    public function generate(array $targets, HostStateRepository $state)
+    public function generate(array $targets, HostStateRepository $state, array $upsTargets = [], HostStateRepository $upsState = null)
     {
         $rows = [];
 
         foreach ($targets as $t) {
             if (!is_array($t)) {
+                continue;
+            }
+
+            $web = (bool) ($t['web'] ?? true);
+            if ($web !== true) {
                 continue;
             }
 
@@ -52,6 +57,46 @@ class HtmlIndexReportGenerator implements ReportGeneratorInterface
                 'status' => $status,
                 'problem_since' => $problemSince,
             ];
+        }
+
+        if ($upsState !== null) {
+            foreach ($upsTargets as $t) {
+                if (!is_array($t)) {
+                    continue;
+                }
+
+                $web = (bool) ($t['web'] ?? true);
+                if ($web !== true) {
+                    continue;
+                }
+
+                $ip = (string) ($t['ip'] ?? '');
+                if ($ip === '') {
+                    continue;
+                }
+
+                $entry = $upsState->get($ip) ?? [];
+                $status = (string) ($entry['status'] ?? 'unknown');
+
+                $label = '';
+
+                $problemSince = null;
+                if ($status === 'critical') {
+                    $problemSince = $entry['warning_start'] ?? null;
+                    if (!is_string($problemSince) || $problemSince === '') {
+                        $problemSince = $entry['critical_since'] ?? null;
+                    }
+                    if (!is_string($problemSince) || $problemSince === '') {
+                        $problemSince = null;
+                    }
+                }
+
+                $rows[] = [
+                    'label' => $label,
+                    'status' => $status,
+                    'problem_since' => $problemSince,
+                ];
+            }
         }
 
         $html = $this->render($rows);
@@ -100,7 +145,7 @@ class HtmlIndexReportGenerator implements ReportGeneratorInterface
         }
 
         return '<!doctype html>'
-            . '<html lang="uk">'
+            . '<html lang="en">'
             . '<head>'
             . '<meta charset="utf-8">'
             . '<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">'

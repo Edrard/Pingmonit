@@ -30,6 +30,7 @@ It pings a list of hosts (IP addresses or domain names), stores the current stat
 
 - PHP 7.0+
 - Composer
+- `php-snmp` (PHP SNMP extension) if you want to monitor UPS devices via SNMP
 
 ## Installation
 
@@ -97,6 +98,44 @@ Set to `0` to disable auto-refresh.
 ],
 ```
 
+### UPS monitoring (SNMP)
+
+PingMonit can also monitor UPS devices via SNMP (requires the PHP `php-snmp` extension).
+
+Config keys:
+
+- `ups` List of UPS devices
+- `ups_state_file` Separate JSON state file for UPS (default: `state/ups_state.json`)
+
+Each UPS supports these fields:
+
+- `name` Human-readable name
+- `ip` UPS IP address
+- `send_email` Enable/disable notifications for this UPS
+- `web` Show/hide this UPS on the HTML status page
+- `snmp_version` `1`, `2c`, or `3`
+- `snmp_community` (v1/v2c)
+- `snmp_v3_username`, `snmp_v3_auth_protocol` (`MD5`/`SHA`), `snmp_v3_auth_password`, `snmp_v3_priv_protocol` (`DES`/`AES`), `snmp_v3_priv_password`
+- `oid_capacity` (main metric)
+- `oid_runtime` (TimeTicks)
+- `oid_time_on_battery` (TimeTicks)
+- `oid_battery_status`
+
+Status rules:
+
+- `capacity < 100` => `warning`
+- `capacity < 90` => `critical`
+
+Notification rules:
+
+- Send notifications only when a UPS transitions to `critical`
+- Send recovery notifications when a UPS transitions from `critical` to a non-critical state
+
+TimeTicks:
+
+- `oid_runtime` and `oid_time_on_battery` are expected to return SNMP `TimeTicks` (1/100 sec)
+- PingMonit converts them to **seconds** before sending notifications
+
 ## Usage (CLI)
 
 Run once (typical cron run):
@@ -113,7 +152,21 @@ Useful flags:
 - `--disable_lock` Disable lock file
 - `--lockfile=/path/to/run.lock` Custom lock file
 - `--ip=8.8.8.8` Check only one target
+- `--ups_ip=172.16.2.250` Check only one UPS target by IP
 - `--logs_std` Log to stdout instead of log files
+
+UPS test example (stdout logs, no notifications):
+
+```bash
+php run.php --ups_ip=172.16.2.250 --logs_std --disable_email --disable_telegram
+```
+
+Notes about `--ups_ip`:
+
+- `--ups_ip` does not contain SNMP credentials or OIDs.
+- It only selects one UPS entry from `config/config.php` (from the `ups` section) by matching `ip`.
+- SNMP settings (`snmp_version`, `snmp_community`, SNMP v3 credentials) and OIDs are always taken from the matching UPS entry in the config.
+- If there is no UPS with that `ip` in the config, UPS monitoring will be skipped.
 
 ## Cron example
 

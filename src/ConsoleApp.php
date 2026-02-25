@@ -42,6 +42,12 @@ class ConsoleApp
             'action' => 'StoreString',
         ]);
 
+        $parser->addOption('ups_ip', [
+            'long_name' => '--ups_ip',
+            'description' => 'Test only one UPS by IP',
+            'action' => 'StoreString',
+        ]);
+
         $parser->addOption('disable_lock', [
             'long_name' => '--disable_lock',
             'description' => 'Disable lock (allow concurrent runs)',

@@ -8,10 +8,33 @@ return [
     // Hosts to monitor
     // Both IP addresses and domain names are supported
     'ips' => [
-        'google.com' => ['send_email' => true, 'name' => 'Google'],
-        '8.8.8.8' => ['send_email' => true, 'name' => 'DNS'],
-        '192.168.1.1' => ['send_email' => false, 'name' => 'Local'],
+        'google.com' => ['send_email' => true, 'web' => true, 'name' => 'Google'],
+        '8.8.8.8' => ['send_email' => true, 'web' => true, 'name' => 'DNS'],
+        '192.168.1.1' => ['send_email' => false, 'web' => true, 'name' => 'Local'],
         // Add your hosts here
+    ],
+
+    // UPS devices to monitor (SNMP)
+    // OIDs are vendor/model specific.
+    'ups' => [
+        [
+            'name' => 'UPS 1',
+            'ip' => '192.168.1.2',
+            'send_email' => true,
+            'web' => true,
+            'snmp_version' => '2c',
+            'snmp_community' => 'public',
+            'snmp_v3_username' => '',
+            'snmp_v3_auth_protocol' => 'SHA',
+            'snmp_v3_auth_password' => '',
+            'snmp_v3_priv_protocol' => 'AES',
+            'snmp_v3_priv_password' => '',
+            'oid_capacity' => '',
+            'oid_runtime' => '',
+            'oid_time_on_battery' => '',
+            'oid_battery_status' => '',
+        ],
+        // Add your UPS devices here
     ],
 
     'web_refresh_seconds' => 60,
@@ -31,6 +54,9 @@ return [
     // JSON file path for storing the current system state
     // The file will be created automatically on first run
     'state_file' => __DIR__ . '/../state/system_state.json',
+
+    // JSON file path for storing UPS state
+    'ups_state_file' => __DIR__ . '/../state/ups_state.json',
 
     'telegram' => [
         'enabled' => false,
