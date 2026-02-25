@@ -120,7 +120,7 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/Edrard/MyLog.git",
-                "reference": "c65a95fd169da39868d89425060082fe65ea2e64"
+                "reference": "378dd440a4f7b7ed5c77b5c76c390b55f1fbd06e"
             },
             "require": {
                 "monolog/monolog": "^1.24",
@@ -144,7 +144,7 @@
             ],
             "description": "Wrapper for Monolog",
             "homepage": "https://github.com/Edrard/mylog",
-            "time": "2024-11-20T15:33:12+00:00"
+            "time": "2026-01-21T14:17:56+00:00"
         },
         {
             "name": "edrard/variable",
@@ -896,6 +896,7 @@
                 "issues": "http://pear.php.net/bugs/search.php?cmd=display&package_name[]=Console_CommandLine",
                 "source": "https://github.com/pear/Console_CommandLine"
             },
+            "abandoned": true,
             "time": "2023-04-02T18:49:53+00:00"
         },
         {
@@ -1578,16 +1579,16 @@
         },
         {
             "name": "symfony/translation",
-            "version": "v6.4.31",
+            "version": "v6.4.32",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/translation.git",
-                "reference": "81579408ecf7dc5aa2d8462a6d5c3a430a80e6f2"
+                "reference": "d6cc8e2fdd484f2f41d25938b0e8e3915de3cfbc"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/translation/zipball/81579408ecf7dc5aa2d8462a6d5c3a430a80e6f2",
-                "reference": "81579408ecf7dc5aa2d8462a6d5c3a430a80e6f2",
+                "url": "https://api.github.com/repos/symfony/translation/zipball/d6cc8e2fdd484f2f41d25938b0e8e3915de3cfbc",
+                "reference": "d6cc8e2fdd484f2f41d25938b0e8e3915de3cfbc",
                 "shasum": ""
             },
             "require": {
@@ -1653,7 +1654,7 @@
             "description": "Provides tools to internationalize your application",
             "homepage": "https://symfony.com",
             "support": {
-                "source": "https://github.com/symfony/translation/tree/v6.4.31"
+                "source": "https://github.com/symfony/translation/tree/v6.4.32"
             },
             "funding": [
                 {
@@ -1673,7 +1674,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2025-12-18T11:37:55+00:00"
+            "time": "2026-01-12T19:15:33+00:00"
         },
         {
             "name": "symfony/translation-contracts",
