@@ -72,11 +72,17 @@ cp config/config.php.example config/config.php
 
 ```php
 'ips' => [
-    'google.com' => ['send_email' => true, 'name' => 'Google'],
-    '8.8.8.8' => ['send_email' => true, 'name' => 'DNS'],
-    '192.168.1.1' => ['send_email' => false, 'name' => 'Local'],
+    'google.com' => ['send_email' => true, 'web' => true, 'name' => 'Google'],
+    '8.8.8.8' => ['send_email' => true, 'web' => true, 'name' => 'DNS'],
+    '192.168.1.1' => ['send_email' => false, 'web' => true, 'name' => 'Local'],
 ],
 ```
+
+Per-host fields:
+
+- `name` Optional display name
+- `send_email` Enable/disable notifications for this host
+- `web` Show/hide this host on the HTML status page
 
 ### Web auto-refresh
 
@@ -134,6 +140,31 @@ TimeTicks:
 
 - `oid_runtime` and `oid_time_on_battery` are expected to return SNMP `TimeTicks` (1/100 sec)
 - PingMonit converts them to **seconds** before sending notifications
+
+Example UPS config (SNMP v2c):
+
+```php
+'ups_state_file' => __DIR__ . '/../state/ups_state.json',
+'ups' => [
+    [
+        'name' => 'UPS Server Room',
+        'ip' => '172.16.2.250',
+        'send_email' => true,
+        'web' => true,
+        'snmp_version' => '2c',
+        'snmp_community' => 'your-snmp-community',
+        'snmp_v3_username' => '',
+        'snmp_v3_auth_protocol' => 'SHA',
+        'snmp_v3_auth_password' => '',
+        'snmp_v3_priv_protocol' => 'AES',
+        'snmp_v3_priv_password' => '',
+        'oid_capacity' => '1.3.6.1.4.1.x.x.x',
+        'oid_runtime' => '1.3.6.1.4.1.x.x.x',
+        'oid_time_on_battery' => '1.3.6.1.4.1.x.x.x',
+        'oid_battery_status' => '1.3.6.1.4.1.x.x.x',
+    ],
+],
+```
 
 ## Usage (CLI)
 
