@@ -27,7 +27,8 @@ if [[ ${local_version} != ${git_version} ]]; then
 fi
 
 export COMPOSER_ALLOW_SUPERUSER=1
-composer install --no-dev --no-interaction --no-progress --prefer-dist --optimize-autoloader
+composer self-update --2
+yes | composer update --no-dev
 export COMPOSER_ALLOW_SUPERUSER=0
 
 
