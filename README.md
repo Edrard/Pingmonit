@@ -148,7 +148,7 @@ Example UPS config (SNMP v2c):
 'ups' => [
     [
         'name' => 'UPS Server Room',
-        'ip' => '172.16.2.250',
+        'ip' => '172.16.2.250',  // Use ip:port for non-standard SNMP ports
         'send_email' => true,
         'web' => true,
         'snmp_version' => '2c',
@@ -162,9 +162,45 @@ Example UPS config (SNMP v2c):
         'oid_runtime' => '1.3.6.1.4.1.x.x.x',
         'oid_time_on_battery' => '1.3.6.1.4.1.x.x.x',
         'oid_battery_status' => '1.3.6.1.4.1.x.x.x',
+        // Optional: override global thresholds for this UPS
+        'thresholds' => [
+            'warning' => 85,  // % and below (overrides global 90)
+            'critical' => 40,  // % and below (overrides global 50)
+        ],
+    ],
+    [
+        'name' => 'UPS Network Closet',
+        'ip' => '172.16.2.251:1161',  // Non-standard SNMP port
+        'send_email' => true,
+        'web' => true,
+        'snmp_version' => '2c',
+        'snmp_community' => 'your-snmp-community',
+        'oid_capacity' => '1.3.6.1.4.1.x.x.x',
+        'oid_runtime' => '1.3.6.1.4.1.x.x.x',
+        'oid_time_on_battery' => '1.3.6.1.4.1.x.x.x',
+        'oid_battery_status' => '1.3.6.1.4.1.x.x.x',
+        // Uses global thresholds (warning=90, critical=50)
     ],
 ],
 ```
+
+### UPS thresholds
+
+- Global thresholds can be set in `ups_thresholds` section:
+  ```php
+  'ups_thresholds' => [
+      'warning' => 90,  // % and below
+      'critical' => 50, // % and below
+  ],
+  ```
+- Per-UPS thresholds can be set in `thresholds` section for each UPS
+- Per-UPS thresholds override global settings
+- If no thresholds are specified, defaults are used (warning=90, critical=50)
+
+### SNMP ports
+
+- Use standard port 161 or specify non-standard ports with `ip:port` format
+- Example: `'ip' => '172.16.2.250:1161'` for port 1161
 
 ## Usage (CLI)
 
@@ -182,7 +218,7 @@ Useful flags:
 - `--disable_lock` Disable lock file
 - `--lockfile=/path/to/run.lock` Custom lock file
 - `--ip=8.8.8.8` Check only one target
-- `--ups_ip=172.16.2.250` Check only one UPS target by IP
+- `--ups_ip=172.16.2.250` Check only one UPS target by IP (supports ip:port for non-standard SNMP ports)
 - `--logs_std` Log to stdout instead of log files
 
 UPS test example (stdout logs, no notifications):
@@ -196,6 +232,7 @@ Notes about `--ups_ip`:
 - `--ups_ip` does not contain SNMP credentials or OIDs.
 - It only selects one UPS entry from `config/config.php` (from the `ups` section) by matching `ip`.
 - SNMP settings (`snmp_version`, `snmp_community`, SNMP v3 credentials) and OIDs are always taken from the matching UPS entry in the config.
+- Supports `ip:port` format for non-standard SNMP ports (e.g., `--ups_ip=172.16.2.250:1161`).
 - If there is no UPS with that `ip` in the config, UPS monitoring will be skipped.
 
 ## Cron example

@@ -5,6 +5,7 @@ namespace Edrard\Pingmonit\Ups;
 use Carbon\Carbon;
 use Edrard\Pingmonit\Contracts\UpsNotifierInterface;
 use Edrard\Pingmonit\State\HostStateRepository;
+use Edrard\Pingmonit\Config;
 use edrard\Log\MyLog;
 
 class UpsMonitor
@@ -69,6 +70,10 @@ class UpsMonitor
             $timeOnBatterySeconds = null;
             $batteryStatus = null;
 
+            // Get thresholds: per-UPS override or global defaults
+            $warningThreshold = (int) ($ups['thresholds']['warning'] ?? $this->getGlobalThreshold('warning', 90));
+            $criticalThreshold = (int) ($ups['thresholds']['critical'] ?? $this->getGlobalThreshold('critical', 50));
+
             try {
                 if ($oidCapacity !== '') {
                     $capacity = $this->snmp->getInt($ups, $oidCapacity);
@@ -92,13 +97,15 @@ class UpsMonitor
 
             if ($capacity === null) {
                 $newStatus = 'unknown';
-            } elseif ($capacity < 90) {
+            } elseif ($capacity < $criticalThreshold) {
                 $newStatus = 'critical';
-            } elseif ($capacity < 100) {
+            } elseif ($capacity < $warningThreshold) {
                 $newStatus = 'warning';
             } else {
                 $newStatus = 'good';
             }
+
+            MyLog::info('UPS ' . $ip . ' thresholds: warning=' . $warningThreshold . '%, critical=' . $criticalThreshold . '%');
 
             if ($newStatus === 'good') {
                 if ($prevStatus !== 'good') {
@@ -177,6 +184,20 @@ class UpsMonitor
             MyLog::info('UPS state saved');
         } else {
             MyLog::info('UPS state saving disabled');
+        }
+    }
+
+    /**
+     * Get global threshold value from config
+     */
+    private function getGlobalThreshold(string $type, int $default): int
+    {
+        try {
+            $thresholds = Config::get('ups_thresholds', []);
+            return (int) ($thresholds[$type] ?? $default);
+        } catch (\Throwable $e) {
+            MyLog::warning('Failed to get global UPS threshold ' . $type . ': ' . $e->getMessage());
+            return $default;
         }
     }
 }
