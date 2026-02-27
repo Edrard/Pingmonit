@@ -37,6 +37,7 @@ class UpsMonitor
 
             $name = (string) ($ups['name'] ?? '');
             $sendEmail = (bool) ($ups['send_email'] ?? true);
+            $sendTelegram = (bool) ($ups['send_telegram'] ?? true);
 
             $oidCapacity = (string) ($ups['oid_capacity'] ?? '');
             $oidRuntime = (string) ($ups['oid_runtime'] ?? '');
@@ -144,9 +145,9 @@ class UpsMonitor
                 'battery_status' => $batteryStatus,
             ];
 
-            if ($this->notifier !== null && $sendEmail) {
+            if ($this->notifier !== null && ($sendEmail || $sendTelegram)) {
                 if ($prevStatus !== 'critical' && $newStatus === 'critical') {
-                    MyLog::info('UPS notify CRITICAL: ' . $ip);
+                    MyLog::info('UPS notify CRITICAL: ' . $ip . ' (email=' . ($sendEmail ? 'yes' : 'no') . ', telegram=' . ($sendTelegram ? 'yes' : 'no') . ')');
                     $this->notifier->notifyCritical($ip, $name, $metrics);
                 }
 
@@ -160,7 +161,7 @@ class UpsMonitor
                         }
                     }
 
-                    MyLog::info('UPS notify RECOVERED: ' . $ip);
+                    MyLog::info('UPS notify RECOVERED: ' . $ip . ' (email=' . ($sendEmail ? 'yes' : 'no') . ', telegram=' . ($sendTelegram ? 'yes' : 'no') . ')');
                     $this->notifier->notifyRecovered($ip, $name, $downtimeSeconds, $metrics);
                 }
             }

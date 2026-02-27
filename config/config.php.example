@@ -8,9 +8,9 @@ return [
     // Hosts to monitor
     // Both IP addresses and domain names are supported
     'ips' => [
-        'google.com' => ['send_email' => true, 'web' => true, 'name' => 'Google'],
-        '8.8.8.8' => ['send_email' => true, 'web' => true, 'name' => 'DNS'],
-        '192.168.1.1' => ['send_email' => false, 'web' => true, 'name' => 'Local'],
+        'google.com' => ['send_email' => true, 'send_telegram' => true, 'web' => true, 'name' => 'Google'],
+        '8.8.8.8' => ['send_email' => true, 'send_telegram' => true, 'web' => true, 'name' => 'DNS'],
+        '192.168.1.1' => ['send_email' => false, 'send_telegram' => true, 'web' => true, 'name' => 'Local'],
         // Add your hosts here
     ],
 
@@ -19,8 +19,9 @@ return [
     'ups' => [
         [
             'name' => 'UPS Server Room',
-            'ip' => '172.16.2.250',
+            'ip' => '172.16.2.250',  // Use ip:port for non-standard SNMP ports
             'send_email' => true,
+            'send_telegram' => true,
             'web' => true,
             'snmp_version' => '2c',
             'snmp_community' => 'your_community',
@@ -41,8 +42,9 @@ return [
         ],
         [
             'name' => 'UPS Network Closet',
-            'ip' => '172.16.2.251',
+            'ip' => '172.16.2.251:1161',  // Non-standard SNMP port
             'send_email' => true,
+            'send_telegram' => true,
             'web' => true,
             'snmp_version' => '2c',
             'snmp_community' => 'your_community',

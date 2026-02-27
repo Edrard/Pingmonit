@@ -91,6 +91,7 @@ class CliRunner
                                 'ip' => $ip,
                                 'name' => '',
                                 'send_email' => true,
+                                'send_telegram' => true,
                                 'web' => true,
                             ];
                         }
@@ -102,6 +103,7 @@ class CliRunner
                             'ip' => $ip,
                             'name' => (string) ($cfg['name'] ?? ''),
                             'send_email' => (bool) ($cfg['send_email'] ?? true),
+                            'send_telegram' => (bool) ($cfg['send_telegram'] ?? true),
                             'web' => (bool) ($cfg['web'] ?? true),
                         ];
                     }
@@ -127,8 +129,12 @@ class CliRunner
 
             $notifier = null;
             $notifiers = [];
+            $sendEmail = false;
+            $sendTelegram = false;
+            
             if (!$disableEmail) {
                 $notifiers[] = new EmailNotifierAdapter(new EmailNotifier());
+                $sendEmail = true;
             }
 
             $telegramConfig = Config::get('telegram', []);
@@ -140,6 +146,7 @@ class CliRunner
 
                 if ($apiKey !== '' && $botUsername !== '' && $chatId !== '') {
                     $notifiers[] = new TelegramNotifierAdapter($apiKey, $botUsername, $chatId);
+                    $sendTelegram = true;
                 } else {
                     MyLog::warning('Telegram enabled but api_key/bot_username/chat_id not configured');
                 }
@@ -148,7 +155,7 @@ class CliRunner
             if (count($notifiers) === 1) {
                 $notifier = $notifiers[0];
             } elseif (count($notifiers) > 1) {
-                $notifier = new CompositeNotifier($notifiers);
+                $notifier = new CompositeNotifier($notifiers, $sendEmail, $sendTelegram);
             }
 
             $pingService = new JjgPingService();
@@ -181,6 +188,7 @@ class CliRunner
 
                     $ups['name'] = (string) ($ups['name'] ?? '');
                     $ups['send_email'] = (bool) ($ups['send_email'] ?? true);
+                    $ups['send_telegram'] = (bool) ($ups['send_telegram'] ?? true);
                     $ups['web'] = (bool) ($ups['web'] ?? true);
                     $ups['snmp_version'] = (string) ($ups['snmp_version'] ?? '2c');
                     $ups['snmp_community'] = (string) ($ups['snmp_community'] ?? 'public');
@@ -195,8 +203,12 @@ class CliRunner
 
             $upsNotifier = null;
             $upsNotifiers = [];
+            $upsSendEmail = false;
+            $upsSendTelegram = false;
+            
             if (!$disableEmail) {
                 $upsNotifiers[] = new UpsEmailNotifierAdapter(new EmailNotifier());
+                $upsSendEmail = true;
             }
 
             if ($telegramEnabled && !$disableTelegram) {
@@ -206,13 +218,14 @@ class CliRunner
 
                 if ($apiKey !== '' && $botUsername !== '' && $chatId !== '') {
                     $upsNotifiers[] = new UpsTelegramNotifierAdapter($apiKey, $botUsername, $chatId);
+                    $upsSendTelegram = true;
                 }
             }
 
             if (count($upsNotifiers) === 1) {
                 $upsNotifier = $upsNotifiers[0];
             } elseif (count($upsNotifiers) > 1) {
-                $upsNotifier = new UpsCompositeNotifier($upsNotifiers);
+                $upsNotifier = new UpsCompositeNotifier($upsNotifiers, $upsSendEmail, $upsSendTelegram);
             }
 
             if ($upsTargets !== []) {

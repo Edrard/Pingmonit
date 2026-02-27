@@ -72,16 +72,17 @@ cp config/config.php.example config/config.php
 
 ```php
 'ips' => [
-    'google.com' => ['send_email' => true, 'web' => true, 'name' => 'Google'],
-    '8.8.8.8' => ['send_email' => true, 'web' => true, 'name' => 'DNS'],
-    '192.168.1.1' => ['send_email' => false, 'web' => true, 'name' => 'Local'],
+    'google.com' => ['send_email' => true, 'send_telegram' => true, 'web' => true, 'name' => 'Google'],
+    '8.8.8.8' => ['send_email' => true, 'send_telegram' => true, 'web' => true, 'name' => 'DNS'],
+    '192.168.1.1' => ['send_email' => false, 'send_telegram' => true, 'web' => true, 'name' => 'Local'],
 ],
 ```
 
 Per-host fields:
 
 - `name` Optional display name
-- `send_email` Enable/disable notifications for this host
+- `send_email` Enable/disable email notifications for this host
+- `send_telegram` Enable/disable Telegram notifications for this host  
 - `web` Show/hide this host on the HTML status page
 
 ### Web auto-refresh
@@ -150,6 +151,7 @@ Example UPS config (SNMP v2c):
         'name' => 'UPS Server Room',
         'ip' => '172.16.2.250',  // Use ip:port for non-standard SNMP ports
         'send_email' => true,
+        'send_telegram' => true,
         'web' => true,
         'snmp_version' => '2c',
         'snmp_community' => 'your-snmp-community',
@@ -172,6 +174,7 @@ Example UPS config (SNMP v2c):
         'name' => 'UPS Network Closet',
         'ip' => '172.16.2.251:1161',  // Non-standard SNMP port
         'send_email' => true,
+        'send_telegram' => true,
         'web' => true,
         'snmp_version' => '2c',
         'snmp_community' => 'your-snmp-community',
@@ -196,6 +199,20 @@ Example UPS config (SNMP v2c):
 - Per-UPS thresholds can be set in `thresholds` section for each UPS
 - Per-UPS thresholds override global settings
 - If no thresholds are specified, defaults are used (warning=90, critical=50)
+
+### UPS notification fields
+
+- `send_email` Enable/disable email notifications for this UPS
+- `send_telegram` Enable/disable Telegram notifications for this UPS
+- Both fields default to `true` if not specified
+- You can disable one channel while keeping the other active
+
+### Host notification fields
+
+- `send_email` Enable/disable email notifications for this host
+- `send_telegram` Enable/disable Telegram notifications for this host
+- Both fields default to `true` if not specified
+- You can disable one channel while keeping the other active
 
 ### SNMP ports
 

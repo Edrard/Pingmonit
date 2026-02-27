@@ -35,10 +35,12 @@ class PingMonitor
                 $ip = $target;
                 $hostname = '';
                 $sendEmail = true;
+                $sendTelegram = true;
             } elseif (is_array($target)) {
                 $ip = (string) ($target['ip'] ?? '');
                 $hostname = (string) ($target['name'] ?? '');
                 $sendEmail = (bool) ($target['send_email'] ?? true);
+                $sendTelegram = (bool) ($target['send_telegram'] ?? true);
             } else {
                 continue;
             }
@@ -117,14 +119,14 @@ class PingMonitor
                 }
             }
 
-            if ($this->notifier !== null && $sendEmail) {
+            if ($this->notifier !== null && ($sendEmail || $sendTelegram)) {
                 if ($prevStatus === 'warning' && $newStatus === 'critical') {
-                    MyLog::info("Email: {$ip} transitioned to CRITICAL");
+                    MyLog::info("Notify: {$ip} transitioned to CRITICAL (email=" . ($sendEmail ? 'yes' : 'no') . ", telegram=" . ($sendTelegram ? 'yes' : 'no') . ")");
                     $this->notifier->notifyDown($ip, $hostname, $newFailures);
                 }
 
                 if ($prevStatus === 'critical' && $newStatus === 'good') {
-                    MyLog::info("Email: {$ip} recovered to GOOD");
+                    MyLog::info("Notify: {$ip} recovered to GOOD (email=" . ($sendEmail ? 'yes' : 'no') . ", telegram=" . ($sendTelegram ? 'yes' : 'no') . ")");
                     $this->notifier->notifyUp($ip, $hostname, 0);
                 }
             }
