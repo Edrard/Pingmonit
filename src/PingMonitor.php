@@ -75,7 +75,7 @@ class PingMonitor
             $latency = $this->pingService->ping($ip, $timeout);
             $isUp = ($latency !== null);
 
-            MyLog::info("Ping {$ip}: " . ($isUp ? 'OK' : 'FAIL'));
+            MyLog::info("[{$ip}] Ping {$ip}: " . ($isUp ? 'OK' : 'FAIL'));
 
             $newStatus = $prevStatus;
             $newFailures = $prevFailures;
@@ -121,12 +121,12 @@ class PingMonitor
 
             if ($this->notifier !== null && ($sendEmail || $sendTelegram)) {
                 if ($prevStatus === 'warning' && $newStatus === 'critical') {
-                    MyLog::info("Notify: {$ip} transitioned to CRITICAL (email=" . ($sendEmail ? 'yes' : 'no') . ", telegram=" . ($sendTelegram ? 'yes' : 'no') . ")");
+                    MyLog::info("[{$ip}] Notify (PID=" . getmypid() . "): {$ip} transitioned to CRITICAL (email=" . ($sendEmail ? 'yes' : 'no') . ", telegram=" . ($sendTelegram ? 'yes' : 'no') . ")");
                     $this->notifier->notifyDown($ip, $hostname, $newFailures);
                 }
 
                 if ($prevStatus === 'critical' && $newStatus === 'good') {
-                    MyLog::info("Notify: {$ip} recovered to GOOD (email=" . ($sendEmail ? 'yes' : 'no') . ", telegram=" . ($sendTelegram ? 'yes' : 'no') . ")");
+                    MyLog::info("[{$ip}] Notify (PID=" . getmypid() . "): {$ip} recovered to GOOD (email=" . ($sendEmail ? 'yes' : 'no') . ", telegram=" . ($sendTelegram ? 'yes' : 'no') . ")");
                     $this->notifier->notifyUp($ip, $hostname, 0);
                 }
             }

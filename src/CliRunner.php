@@ -165,9 +165,16 @@ class CliRunner
                 'max_failures' => $maxFailures,
             ]);
 
-            $monitor->checkHosts($targets, [
-                'disable_state' => $disableState,
-            ]);
+            // Parallel processing if pcntl is available
+            if (function_exists('pcntl_fork') && count($targets) > 1) {
+                $this->checkHostsParallel($monitor, $state, $targets, [
+                    'disable_state' => $disableState,
+                ]);
+            } else {
+                $monitor->checkHosts($targets, [
+                    'disable_state' => $disableState,
+                ]);
+            }
 
             $upsTargets = [];
             $upsConfig = Config::get('ups', []);
@@ -245,5 +252,45 @@ class CliRunner
                 $lock->release();
             }
         }
+    }
+
+    /**
+     * Check hosts in parallel using pcntl_fork with shared state
+     */
+    private function checkHostsParallel($monitor, $state, array $targets, array $options = [])
+    {
+        $children = [];
+        $maxConcurrency = 20; // Limit concurrent processes
+        
+        MyLog::info("Starting parallel checks for " . count($targets) . " targets (max concurrency: {$maxConcurrency})");
+
+        foreach ($targets as $i => $target) {
+            // Wait for available slot
+            while (count($children) >= $maxConcurrency) {
+                $finished = pcntl_wait($status);
+                unset($children[array_search($finished, $children)]);
+            }
+
+            $pid = pcntl_fork();
+            if ($pid == -1) {
+                MyLog::error("Failed to fork process for target: " . ($target['ip'] ?? 'unknown'));
+                continue;
+            } elseif ($pid == 0) {
+                // Child process - use shared state
+                $monitor->checkHosts([$target], $options);
+                exit(0);
+            } else {
+                // Parent process
+                $children[] = $pid;
+            }
+        }
+
+        // Wait for all remaining children
+        while (count($children) > 0) {
+            $finished = pcntl_wait($status);
+            unset($children[array_search($finished, $children)]);
+        }
+
+        MyLog::info("All parallel checks completed");
     }
 }

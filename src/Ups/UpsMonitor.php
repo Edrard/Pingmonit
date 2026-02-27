@@ -92,7 +92,7 @@ class UpsMonitor
                 MyLog::warning('UPS SNMP read failed for ' . $ip . ': ' . $e->getMessage());
             }
 
-            MyLog::info('UPS ' . $ip . ' capacity=' . ($capacity === null ? 'n/a' : (string) $capacity) . ', runtime_sec=' . ($runtimeSeconds === null ? 'n/a' : (string) $runtimeSeconds) . ', time_on_battery_sec=' . ($timeOnBatterySeconds === null ? 'n/a' : (string) $timeOnBatterySeconds) . ', battery_status=' . ($batteryStatus === null ? 'n/a' : (string) $batteryStatus));
+            MyLog::info("[UPS-{$ip}] UPS {$ip} capacity=" . ($capacity === null ? 'n/a' : (string) $capacity) . ', runtime_sec=' . ($runtimeSeconds === null ? 'n/a' : (string) $runtimeSeconds) . ', time_on_battery_sec=' . ($timeOnBatterySeconds === null ? 'n/a' : (string) $timeOnBatterySeconds) . ', battery_status=' . ($batteryStatus === null ? 'n/a' : (string) $batteryStatus));
 
             $newStatus = $prevStatus;
 
@@ -147,7 +147,7 @@ class UpsMonitor
 
             if ($this->notifier !== null && ($sendEmail || $sendTelegram)) {
                 if ($prevStatus !== 'critical' && $newStatus === 'critical') {
-                    MyLog::info('UPS notify CRITICAL: ' . $ip . ' (email=' . ($sendEmail ? 'yes' : 'no') . ', telegram=' . ($sendTelegram ? 'yes' : 'no') . ')');
+                    MyLog::info("[UPS-{$ip}] notify CRITICAL: " . $ip . ' (email=' . ($sendEmail ? 'yes' : 'no') . ', telegram=' . ($sendTelegram ? 'yes' : 'no') . ')');
                     $this->notifier->notifyCritical($ip, $name, $metrics);
                 }
 
@@ -161,7 +161,7 @@ class UpsMonitor
                         }
                     }
 
-                    MyLog::info('UPS notify RECOVERED: ' . $ip . ' (email=' . ($sendEmail ? 'yes' : 'no') . ', telegram=' . ($sendTelegram ? 'yes' : 'no') . ')');
+                    MyLog::info("[UPS-{$ip}] notify RECOVERED: " . $ip . ' (email=' . ($sendEmail ? 'yes' : 'no') . ', telegram=' . ($sendTelegram ? 'yes' : 'no') . ')');
                     $this->notifier->notifyRecovered($ip, $name, $downtimeSeconds, $metrics);
                 }
             }
@@ -177,7 +177,7 @@ class UpsMonitor
                 'critical_since' => $criticalSince,
             ]);
 
-            MyLog::info('UPS State ' . $ip . ': ' . $prevStatus . ' -> ' . $newStatus);
+            MyLog::info("[UPS-{$ip}] State {$ip}: {$prevStatus} -> {$newStatus}");
         }
 
         if (!$disableState) {

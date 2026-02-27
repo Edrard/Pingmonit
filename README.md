@@ -28,9 +28,10 @@ It pings a list of hosts (IP addresses or domain names), stores the current stat
 
 ## Requirements
 
-- PHP 7.0+
+- PHP 8.0+
 - Composer
-- `php-snmp` (PHP SNMP extension) if you want to monitor UPS devices via SNMP
+- `pcntl` extension (for parallel processing)
+- `php-snmp` extension (for UPS monitoring)
 
 ## Installation
 
@@ -259,6 +260,35 @@ Run every minute:
 ```bash
 * * * * * /usr/bin/php /path/to/pingmonit/run.php >/dev/null 2>&1
 ```
+
+## Parallel Processing
+
+PingMonit supports parallel checking of hosts and UPS devices for improved performance:
+
+### How it works
+- Each host/UPS runs in a separate process
+- Process IDs are shown in logs for easy identification
+- All processes share the same state repository for consistency
+- All processes run simultaneously, then results are collected
+
+### Log format with process IDs
+```
+[2026-02-27 12:30:01] [8.8.8.8] Ping 8.8.8.8: OK
+[2026-02-27 12:30:01] [1.1.1.1] Ping 1.1.1.1: FAIL
+[2026-02-27 12:30:01] [UPS-172.16.2.250] UPS 172.16.2.250 capacity=85%
+[2026-02-27 12:30:01] [192.168.1.1] Ping 192.168.1.1: OK
+```
+
+### Benefits
+- ✅ **Faster execution** - Multiple hosts checked simultaneously
+- ✅ **Clear identification** - Each log entry shows which target
+- ✅ **Better debugging** - Easy to trace specific host issues
+- ✅ **Maintained compatibility** - Existing configs work unchanged
+
+### Requirements
+- Linux environment with `pcntl` extension
+- No configuration changes required
+- Automatic fallback to sequential mode if `pcntl` not available
 
 ## Status page
 
