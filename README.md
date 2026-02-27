@@ -290,6 +290,57 @@ PingMonit supports parallel checking of hosts and UPS devices for improved perfo
 - No configuration changes required
 - Automatic fallback to sequential mode if `pcntl` not available
 
+## Log Rotation
+
+PingMonit supports automatic log rotation using `logrotate`:
+
+### Setup
+
+1. **Copy logrotate configuration:**
+```bash
+sudo cp logrotate.conf /etc/logrotate.d/pingmonit
+```
+
+2. **Run setup script (optional):**
+```bash
+sudo chmod +x setup-logrotate.sh
+sudo ./setup-logrotate.sh
+```
+
+### Configuration Details
+
+- **Retention:** 30 days
+- **Rotation:** Daily
+- **Compression:** Enabled (gzip)
+- **Log format:** `YYYY-MM-DD.log`
+- **Permissions:** `644 www-data www-data`
+
+### Manual Testing
+
+```bash
+# Test configuration
+sudo logrotate -d /etc/logrotate.d/pingmonit
+
+# Force rotation
+sudo logrotate -f /etc/logrotate.d/pingmonit --force
+
+# Dry run
+sudo logrotate -f /etc/logrotate.d/pingmonit --dry-run
+```
+
+### Log Files Location
+
+Default log directory: `logs/` (relative to PingMonit root)
+
+Example log files:
+```
+logs/
+├── pingmonit-20260227.log
+├── pingmonit-20260226.log
+├── pingmonit-20260225.log
+└── pingmonit-20260224.log.gz
+```
+
 ## Status page
 
 After each run, PingMonit generates:
