@@ -23,6 +23,11 @@ class PingMonitor
         $this->config = $config;
     }
 
+    public function getNotifier(): ?NotifierInterface
+    {
+        return $this->notifier;
+    }
+
     public function checkHosts(array $ips, array $options = [])
     {
         $disableState = (bool) ($options['disable_state'] ?? false);

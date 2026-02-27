@@ -167,9 +167,15 @@ class CliRunner
 
             // Parallel processing if pcntl is available
             if (function_exists('pcntl_fork') && count($targets) > 1) {
-                $this->checkHostsParallel($monitor, $state, $targets, [
-                    'disable_state' => $disableState,
+                $this->checkHostsParallel($monitor, $state, $targets, $timeout, $maxFailures, [
+                    'disable_state' => true,  // Disable state saving in child processes
                 ]);
+                
+                // Save state once after all processes complete
+                if (!$disableState) {
+                    $state->save();
+                    MyLog::info('State saved');
+                }
             } else {
                 $monitor->checkHosts($targets, [
                     'disable_state' => $disableState,
@@ -255,9 +261,9 @@ class CliRunner
     }
 
     /**
-     * Check hosts in parallel using pcntl_fork with shared state
+     * Check hosts in parallel using pcntl_fork with true shared state
      */
-    private function checkHostsParallel($monitor, $state, array $targets, array $options = [])
+    private function checkHostsParallel($monitor, $state, array $targets, int $timeout, int $maxFailures, array $options = [])
     {
         $children = [];
         $maxConcurrency = 20; // Limit concurrent processes
@@ -276,8 +282,13 @@ class CliRunner
                 MyLog::error("Failed to fork process for target: " . ($target['ip'] ?? 'unknown'));
                 continue;
             } elseif ($pid == 0) {
-                // Child process - use shared state
-                $monitor->checkHosts([$target], $options);
+                // Child process - create new monitor with shared state
+                $pingService = new JjgPingService();
+                $newMonitor = new PingMonitor($state, $pingService, $monitor->getNotifier(), [
+                    'ping_timeout' => $timeout,
+                    'max_failures' => $maxFailures,
+                ]);
+                $newMonitor->checkHosts([$target], $options);
                 exit(0);
             } else {
                 // Parent process
