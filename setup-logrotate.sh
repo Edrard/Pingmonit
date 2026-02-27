@@ -4,7 +4,9 @@
 # This script sets up logrotate for PingMonit logs
 
 # Configuration
-LOG_DIR="/path/to/pingmonit/logs"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PINGMONIT_DIR="$SCRIPT_DIR"
+LOG_DIR="$PINGMONIT_DIR/logs"
 LOGROTATE_CONF="/etc/logrotate.d/pingmonit"
 SERVICE_NAME="pingmonit"
 
@@ -33,7 +35,7 @@ fi
 
 # Install logrotate configuration
 echo "Installing logrotate configuration..."
-cp "$(dirname "$0")/logrotate.conf" "$LOGROTATE_CONF"
+sed "s|{{LOG_DIR}}|$LOG_DIR|g" "$(dirname "$0")/logrotate.conf" > "$LOGROTATE_CONF"
 
 # Set correct permissions
 chmod 644 "$LOGROTATE_CONF"
