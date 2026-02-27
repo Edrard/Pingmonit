@@ -1,6 +1,8 @@
 # Set executable permissions for shell scripts
-setup-logrotate.sh git eol=lf mode=755
-*.sh git eol=lf mode=755
+*.sh text eol=lf
+
+# Ensure setup script is executable
+setup-logrotate.sh text eol=lf
 
 # Default line ending for all files
 * text=auto eol=lf
