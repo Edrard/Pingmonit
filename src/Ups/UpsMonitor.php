@@ -106,7 +106,7 @@ class UpsMonitor
                 $newStatus = 'good';
             }
 
-            MyLog::info('UPS ' . $ip . ' thresholds: warning=' . $warningThreshold . '%, critical=' . $criticalThreshold . '%');
+            MyLog::info("[UPS-{$ip}] UPS {$ip} thresholds: warning={$warningThreshold}%, critical={$criticalThreshold}%");
 
             if ($newStatus === 'good') {
                 if ($prevStatus !== 'good') {

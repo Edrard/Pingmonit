@@ -143,7 +143,7 @@ class PingMonitor
                 'latency_ms' => $isUp ? (float) $latency : null,
             ]);
 
-            MyLog::info("State {$ip}: {$prevStatus} -> {$newStatus} (failures={$newFailures}, max_failures={$maxFailures})");
+            MyLog::info("[{$ip}] State {$ip}: {$prevStatus} -> {$newStatus} (failures={$newFailures}, max_failures={$maxFailures})");
         }
 
         if (!$disableState) {
