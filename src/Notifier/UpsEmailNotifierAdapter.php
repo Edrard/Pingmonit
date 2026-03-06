@@ -69,6 +69,6 @@ class UpsEmailNotifierAdapter implements UpsNotifierInterface
         $body .= "Capacity: {$prevCapacity}% -> {$newCapacity}%\n";
         $body .= "Time: " . date('Y-m-d H:i:s');
         
-        $this->sendNotification($subject, $body);
+        $this->inner->sendNotification($subject, $body);
     }
 }

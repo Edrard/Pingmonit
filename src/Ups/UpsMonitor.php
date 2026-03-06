@@ -130,8 +130,8 @@ class UpsMonitor
                     MyLog::info("[UPS-{$ip}] UPS {$ip} started discharging (capacity: {$prevCapacity}% -> {$capacity}%)");
                 }
                 
-                // Send trend notifications
-                if ($this->notifier !== null && ($sendEmail || $sendTelegram)) {
+                // Send trend notifications only if UPS is not in 'good' status
+                if ($this->notifier !== null && ($sendEmail || $sendTelegram) && $newStatus !== 'good') {
                     $this->notifier->notifyTrendChange($ip, $name, $newTrend, $capacity, $prevCapacity);
                 }
             }
