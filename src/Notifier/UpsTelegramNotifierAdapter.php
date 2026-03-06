@@ -83,4 +83,29 @@ class UpsTelegramNotifierAdapter implements UpsNotifierInterface
             MyLog::warning('Telegram send failed' . ($desc !== '' ? (': ' . $desc) : ''));
         }
     }
+
+    public function notifyTrendChange($ip, $name, $trend, $newCapacity, $prevCapacity)
+    {
+        $displayName = $name !== '' ? $name : $ip;
+        
+        $text = "UPS {$displayName} ({$ip})\n";
+        $text .= "Trend: {$trend}\n";
+        $text .= "Capacity: {$prevCapacity}% -> {$newCapacity}%\n";
+        $text .= "Time: " . date('Y-m-d H:i:s');
+        
+        $response = Request::sendMessage([
+            'chat_id' => $this->chatId,
+            'text' => $text,
+        ]);
+
+        if (is_object($response) && method_exists($response, 'isOk') && $response->isOk()) {
+            MyLog::info('Telegram send ok');
+        } else {
+            $desc = '';
+            if (is_object($response) && method_exists($response, 'getDescription')) {
+                $desc = (string) $response->getDescription();
+            }
+            MyLog::warning('Telegram send failed' . ($desc !== '' ? (': ' . $desc) : ''));
+        }
+    }
 }

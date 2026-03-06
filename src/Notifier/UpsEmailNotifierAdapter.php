@@ -57,4 +57,18 @@ class UpsEmailNotifierAdapter implements UpsNotifierInterface
 
         return $this->inner->sendNotification($subject, $body);
     }
+
+    public function notifyTrendChange($ip, $name, $trend, $newCapacity, $prevCapacity)
+    {
+        $displayName = $name !== '' ? $name : $ip;
+        
+        $subject = "UPS {$displayName} Trend Change";
+        
+        $body = "UPS {$displayName} ({$ip}) trend changed\n\n";
+        $body .= "Trend: {$trend}\n";
+        $body .= "Capacity: {$prevCapacity}% -> {$newCapacity}%\n";
+        $body .= "Time: " . date('Y-m-d H:i:s');
+        
+        $this->sendNotification($subject, $body);
+    }
 }

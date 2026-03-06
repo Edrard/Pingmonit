@@ -44,4 +44,18 @@ class UpsCompositeNotifier implements UpsNotifierInterface
             }
         }
     }
+
+    public function notifyTrendChange($ip, $name, $trend, $newCapacity, $prevCapacity)
+    {
+        foreach ($this->notifiers as $notifier) {
+            if ($notifier instanceof UpsNotifierInterface) {
+                // Check notifier type and corresponding flag
+                if (($notifier instanceof UpsEmailNotifierAdapter && !$this->sendEmail) ||
+                    ($notifier instanceof UpsTelegramNotifierAdapter && !$this->sendTelegram)) {
+                    continue;
+                }
+                $notifier->notifyTrendChange($ip, $name, $trend, $newCapacity, $prevCapacity);
+            }
+        }
+    }
 }

@@ -48,6 +48,8 @@ class UpsMonitor
 
             $entry = $this->state->get($ip) ?? [];
             $prevStatus = (string) ($entry['status'] ?? 'unknown');
+            $prevCapacity = $entry['capacity'] ?? null;
+            $prevTrend = $entry['charge_trend'] ?? 'unknown';
             $warningStart = $entry['warning_start'] ?? null;
             $lastWarning = $entry['last_warning'] ?? null;
             $criticalSince = $entry['critical_since'] ?? null;
@@ -107,6 +109,32 @@ class UpsMonitor
             }
 
             MyLog::info("[UPS-{$ip}] UPS {$ip} thresholds: warning={$warningThreshold}%, critical={$criticalThreshold}%");
+
+            // Detect charge trend changes
+            $newTrend = 'unknown';
+            if ($prevCapacity !== null && $capacity !== null) {
+                if ($capacity > $prevCapacity) {
+                    $newTrend = 'charging';
+                } elseif ($capacity < $prevCapacity) {
+                    $newTrend = 'discharging';
+                } else {
+                    $newTrend = $prevTrend; // no change
+                }
+            }
+
+            // Log trend changes
+            if ($prevTrend !== 'unknown' && $newTrend !== 'unknown' && $prevTrend !== $newTrend) {
+                if ($newTrend === 'charging') {
+                    MyLog::info("[UPS-{$ip}] UPS {$ip} started charging (capacity: {$prevCapacity}% -> {$capacity}%)");
+                } elseif ($newTrend === 'discharging') {
+                    MyLog::info("[UPS-{$ip}] UPS {$ip} started discharging (capacity: {$prevCapacity}% -> {$capacity}%)");
+                }
+                
+                // Send trend notifications
+                if ($this->notifier !== null && ($sendEmail || $sendTelegram)) {
+                    $this->notifier->notifyTrendChange($ip, $name, $newTrend, $capacity, $prevCapacity);
+                }
+            }
 
             if ($newStatus === 'good') {
                 if ($prevStatus !== 'good') {
@@ -170,6 +198,8 @@ class UpsMonitor
                 'ip' => $ip,
                 'name' => $name,
                 'status' => $newStatus,
+                'capacity' => $capacity,
+                'charge_trend' => $newTrend,
                 'last_test_at' => $nowIso,
                 'last_status_change_at' => $lastStatusChangeAt,
                 'warning_start' => $warningStart,
