@@ -8,6 +8,11 @@
             "Edrard\\Pingmonit\\": "src/"
         }
     },
+    "autoload-dev": {
+        "psr-4": {
+            "Tests\\": "tests/"
+        }
+    },
     "authors": [{
         "name": "Edrard",
         "email": "demonand@gmail.com"
@@ -36,5 +41,15 @@
         "pear/console_commandline": "^1.2",
         "geerlingguy/ping": "^1.2",
         "longman/telegram-bot": "^0.83.1"
+    },
+    "require-dev": {
+        "pestphp/pest": "^4.4",
+        "pestphp/pest-plugin": "^4.0",
+        "mockery/mockery": "^1.6"
+    },
+    "config": {
+        "allow-plugins": {
+            "pestphp/pest-plugin": true
+        }
     }
 }
